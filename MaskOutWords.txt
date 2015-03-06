@@ -1,0 +1,56 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class MaskOutWords {
+
+	public static void main(String[] args) {
+
+		String[] word = { "Yesterday", "dog", "food", "walk" };
+		String txt = "Yesterday, I took my dog for a walk.\n It was crazy! My dog wanted only food.";
+		maskOutWords(word, txt);
+
+	}
+
+	public static void maskOutWords(String[] word, String txt) {
+
+		ArrayList<String> array = new ArrayList<String>(Arrays.asList(txt.split(" ")));
+		for (int i = 0; i < word.length; i++) {
+			for (int k = 0; k < array.size(); k++) {
+				if (compareWords(array.get(k),word[i]) == true) {
+					array.set(k,array.get(k).replace(word[i],
+									replacingWithSymbol(word[i])));
+				}
+			}
+		}
+		convertToString(array); 
+	}
+
+	public static String replacingWithSymbol(String word) {
+		String result = null;
+		char[] arr = new char[word.length()];
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = '*';
+		}
+		result = String.valueOf(arr);
+		return result;
+
+	}
+	
+	public static void convertToString(ArrayList<String> list){
+		String listString = "";
+		for (String s : list)
+		{
+		    listString += s + " ";
+		}
+		System.out.println(listString);
+	}
+
+	public static boolean compareWords(String sentence,String search){
+		
+		if (sentence.toLowerCase().indexOf(search.toLowerCase()) != -1 ) {
+			return true;
+		} else {
+		   return false;
+		}
+	}
+}

@@ -1,0 +1,179 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.InputMismatchException;
+import java.util.LinkedList;
+import java.util.Scanner;
+
+public class CSVFile {
+
+	public static void main(String[] args) throws FileNotFoundException,
+			InputMismatchException {
+
+		Scanner sc = new Scanner(System.in);
+		int answer = 0;
+		while (answer != 1 || answer != 2 || answer != 3 || answer != 4
+				|| answer != 5) {
+			System.out.println("---------Menu-----------");
+			System.out.println("1.SELECT [columns] LIMIT X\n"
+					+ "2.SUM [column]\n" + "3.SHOW\n" + "4.FIND X\n"
+					+ "5.Exit\n");
+			System.out.print("Enter your answer: ");
+			answer = sc.nextInt();
+			switch (answer) {
+			case 1:
+				System.out.print("Enter the number of columns:");
+				int columns = sc.nextInt();
+				System.out.print("Enter the limit of rows:");
+				int limit = sc.nextInt();
+				CSVFile.select(columns, limit);
+				break;
+			case 2:
+				System.out.print("Enter the number of the column:");
+				int number = sc.nextInt();
+				CSVFile.sum(number);
+				break;
+			case 3:
+				CSVFile.show();
+				break;
+			case 4:
+				System.out.print("Enter the string you want to search:");
+				Scanner scan = new Scanner(System.in);
+				String str = scan.nextLine();
+				CSVFile.find(str);
+				break;
+			case 5:
+				System.exit(0);
+			default:
+				answer = 0;
+				System.out.println("Invalid choice !\n");
+				break;
+			}
+		}
+		sc.close();
+	}
+
+	public static String[][] read() {
+
+		String csvFile = "C:\\Users\\Ridvan\\Documents\\test.csv";
+		BufferedReader br = null;
+		String line = "";
+		LinkedList<String[]> rows = new LinkedList<String[]>();
+		String[][] csv = null;
+		try {
+			br = new BufferedReader(new FileReader(csvFile));
+			while ((line = br.readLine()) != null) {
+
+				rows.addLast(line.split(","));
+			}
+
+			csv = rows.toArray(new String[rows.size()][]);
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		return csv;
+	}
+
+	public static void select(int columns, int limit) {
+
+		String[][] csv = read();
+		if (columns >= 0 && columns <= csv[0].length && limit >= 0
+				&& limit < csv.length) {
+			for (int i = 0; i < limit + 1; i++) {
+				for (int k = 0; k < columns; k++) {
+
+					System.out.print(csv[i][k] + "	");
+				}
+				System.out.println("\n");
+			}
+
+		} else {
+			System.out.println("Invalid input");
+		}
+
+	}
+
+	public static void sum(int column) {
+
+		int sum = 0;
+		String[][] csv = read();
+		if (column >= 0 && column < csv[0].length) {
+
+			for (int i = 0; i < csv.length; i++) {
+
+				if (isInteger(csv[i][column]) == true) {
+					sum += Integer.parseInt(csv[i][column]);
+				}
+			}
+			System.out.print("query> SUM " + csv[0][column] + ">");
+			System.out.println(sum + "\n");
+		} else {
+			System.out.println("Invalid input");
+		}
+
+	}
+
+	public static void show() {
+		String[][] csv = read();
+		for (int j = 0; j < csv[0].length; j++) {
+			System.out.print(csv[0][j] + "	");
+		}
+		System.out.println("\n");
+	}
+
+	public static boolean isInteger(String s) {
+		try {
+			Integer.parseInt(s);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+
+	public static void find(String s) {
+
+		String[][] csv = read();
+		ArrayList<Integer> rows = new ArrayList<Integer>();
+		show();
+		for (int i = 1; i < csv.length; i++) {
+			for (int j = 0; j < csv[0].length; j++) {
+				if (csv[i][j].toLowerCase().contains(s.toLowerCase())) {
+
+					rows.add(i);
+				}
+			}
+		}
+
+		HashSet<Integer> hs = new HashSet<Integer>();
+		hs.addAll(rows);
+		rows.clear();
+		rows.addAll(hs);
+
+		if (rows.isEmpty()) {
+			System.out.println("No match found!!!");
+		} else {
+			for (int l = 0; l < rows.size(); l++) {
+				for (int k = 0; k < csv[0].length; k++) {
+
+					System.out.print(csv[rows.get(l)][k] + "	");
+				}
+				System.out.println("\n");
+			}
+		}
+	}
+}

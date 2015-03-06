@@ -1,0 +1,143 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+interface MyLogger {
+
+	void log(int level, String message);
+
+}
+
+class ConsoleLogger implements MyLogger {
+
+	public void log(int level, String message) {
+
+		switch (level) {
+		case 1:
+			System.out.println("INFO::" + Time.time() + "::" + message);
+			break;
+		case 2:
+			System.out.println("WARNING::" + Time.time() + "::" + message);
+			break;
+		case 3:
+			System.out.println("PLSCHECKFFS::" + Time.time() + "::" + message);
+			break;
+		default:
+			System.out.println("Level out of bounds");
+		}
+
+	}
+}
+
+class FileLogger implements MyLogger {
+
+	String fileName = null;
+
+	public FileLogger(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public void log(int level, String message) {
+
+		String logMessage = Levels.logMessage(level, message);
+		try {
+			File file = new File(fileName);
+			BufferedWriter output = new BufferedWriter(new FileWriter(file));
+			output.write(logMessage);
+			output.close();
+			System.out.println("The message was writen on the given file.");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+}
+
+class HTTPLogger implements MyLogger {
+	String url = null;
+
+	public HTTPLogger(String url) {
+		this.url = url;
+	}
+
+	public void log(int level, String message) {
+		String logMessage = Levels.logMessage(level, message);
+		try {
+			URL URL = new URL(url);
+			URLConnection conn = URL.openConnection();
+			conn.setDoOutput(true);
+			OutputStreamWriter writer = new OutputStreamWriter(
+					conn.getOutputStream());
+			System.out.println("Sending message to the given HTTP url.");
+			writer.write(logMessage);
+			writer.flush();
+			String line;
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					conn.getInputStream()));
+			System.out.println("The answer is:");
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+			}
+			writer.close();
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}
+
+class Time {
+	public static String time() {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ",
+				Locale.ROOT);
+		String date = sdf.format(System.currentTimeMillis());
+		return date;
+
+	}
+}
+
+class Levels{
+	
+	public static String logMessage(int level,String message){
+		String logMessage = null;
+		switch (level) {
+		case 1:
+			logMessage = "INFO::" + Time.time() + "::" + message;
+			break;
+		case 2:
+			logMessage = "WARNING::" + Time.time() + "::" + message;
+			break;
+		case 3:
+			logMessage = "PLSCHECKFFS::" + Time.time() + "::" + message;
+			break;
+		default:
+			System.out.println("Level out of bounds");
+		}
+		return logMessage;
+	}
+}
+
+public class Logger {
+
+	public static void main(String[] args) {
+
+		ConsoleLogger cl = new ConsoleLogger();
+		cl.log(1, "HackBulgaria");
+		FileLogger fl = new FileLogger("text.txt");
+		fl.log(3, "HackBulgaria");
+		HTTPLogger http = new HTTPLogger("http://hackbulgaria.com");
+		http.log(2, "HackBulgaria");
+	}
+
+}
